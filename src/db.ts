@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Card, ReviewLog } from './types';
+import { WORDBOOK, type Card, type ReviewLog } from './types';
 import { SEED_PHRASES } from './data/phrases';
 import { today } from './srs';
 
@@ -38,7 +38,13 @@ export function newCard(partial: Pick<Card, 'text' | 'meaning'> & Partial<Card>)
   };
 }
 
-const SEEDED_KEY = 'phrase-memo-sync:seeded';
+export const findInWordbook = (text: string) =>
+  db.cards.filter((c) => c.deleted === 0 && c.scene === WORDBOOK && c.text === text).first();
+
+export const addToWordbook = (fields: Pick<Card, 'text' | 'meaning' | 'example' | 'note'>) =>
+  db.cards.add(newCard({ ...fields, scene: WORDBOOK }));
+
+const SEEDED_KEY ='phrase-memo-sync:seeded';
 
 /**
  * 首次运行时导入内置短语。

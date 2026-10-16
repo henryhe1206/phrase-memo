@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { addToWordbook, findInWordbook } from '../db';
+import { scheduleSync } from '../sync';
 import { loadDict, lookup, type LookupResult } from '../dictionary';
 import { grammarFor } from '../data/grammar';
 import { candidates } from '../wordForms';
@@ -8,6 +11,8 @@ import { CollocationBlock, PrepositionBlock } from './GrammarBlocks';
 
 interface Props {
   word: string;
+  /** 单词所在的整句，加入单词本时作为例句 */
+  context: string;
   settings: Settings;
   onClose: () => void;
 }
@@ -25,9 +30,11 @@ function Lines({ text }: { text: string }) {
 }
 
 /** 点击单词后从底部弹出的面板：释义 + 语法搭配。父组件应以 word 作为 key，切换单词时重置状态 */
-export default function WordPanel({ word, settings, onClose }: Props) {
+export default function WordPanel({ word, context, settings, onClose }: Props) {
   const [result, setResult] = useState<Result>({ status: 'loading' });
   const [tab, setTab] = useState<'meaning' | 'grammar'>('meaning');
+  const key = word.toLowerCase();
+  const saved = useLiveQuery(async () => !!(await findInWordbook(key)), [key]);
 
   useEffect(() => {
     speak(word, settings);
@@ -49,6 +56,15 @@ export default function WordPanel({ word, settings, onClose }: Props) {
   const onSpeak = (text: string) => speak(text, settings);
 
   const found = result.status === 'done' ? result.found : null;
+
+  async function addToBook() {
+    if (!found || (await findInWordbook(key))) return;
+    const note = [found.phonetic && `/${found.phonetic}/`, found.base && `原形：${found.base}`]
+      .filter(Boolean)
+      .join('　');
+    await addToWordbook({ text: key, meaning: found.translation, example: context, note });
+    scheduleSync();
+  }
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -115,6 +131,16 @@ export default function WordPanel({ word, settings, onClose }: Props) {
                 </>
               )}
             </>
+          )}
+        </div>
+
+        <div className="sheet-foot">
+          {saved ? (
+            <button disabled>已在单词本 ✓</button>
+          ) : (
+            <button className="primary" disabled={!found} onClick={addToBook}>
+              ＋ 加入单词本
+            </button>
           )}
         </div>
       </div>

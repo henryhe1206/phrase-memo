@@ -81,7 +81,7 @@ export default function App() {
         {view === 'home' && (
           <Home settings={settings} scene={scene} onSceneChange={setScene} onStart={() => setView('study')} />
         )}
-        {view === 'library' && <Library />}
+        {view === 'library' && <Library settings={settings} />}
         {view === 'grammar' && <Grammar settings={settings} />}
         {view === 'stats' && <Stats />}
         {view === 'settings' && <SettingsPage settings={settings} onChange={updateSettings} />}

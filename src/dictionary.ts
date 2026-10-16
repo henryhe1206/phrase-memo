@@ -8,6 +8,8 @@ export interface LookupResult {
   word: string;
   phonetic: string;
   translation: string;
+  /** 当前词是变化形式时的原形（如 went → go、peanuts → peanut） */
+  base?: string;
   lemma?: { word: string; phonetic: string; translation: string };
 }
 
@@ -44,5 +46,6 @@ export function lookup(dict: Dict, raw: string): LookupResult | null {
     translation: entry[1] || lemma?.translation || '',
     // 自己没有释义时已经直接用原形的释义，不再重复展示
     lemma: entry[1] ? lemma : undefined,
+    base: lemmaWord ?? (key !== raw.toLowerCase() ? key : undefined),
   };
 }

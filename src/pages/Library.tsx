@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, liveCards, newCard, touch } from '../db';
 import { scheduleSync } from '../sync';
-import { SCENES, type Card } from '../types';
+import ClickableText from '../components/ClickableText';
+import WordPanel from '../components/WordPanel';
+import { SCENES, type Card, type Settings } from '../types';
 
 interface Draft {
   uid?: string;
@@ -15,11 +17,13 @@ interface Draft {
 
 const EMPTY: Draft = { text: '', meaning: '', example: '', scene: SCENES[0], note: '' };
 
-export default function Library() {
+export default function Library({ settings }: { settings: Settings }) {
   const cards = useLiveQuery(liveCards, []);
   const [query, setQuery] = useState('');
   const [scene, setScene] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [lookup, setLookup] = useState<{ word: string; context: string } | null>(null);
+  const onWord = (word: string, context: string) => setLookup({ word, context });
 
   if (!cards) return null;
 
@@ -106,10 +110,16 @@ export default function Library() {
         {list.map((c) => (
           <li key={c.uid}>
             <div>
-              <b>{c.text}</b>
+              <b>
+                <ClickableText text={c.text} onWord={onWord} />
+              </b>
               <span className="tag">{c.scene}</span>
               <div className="sub-text">{c.meaning}</div>
-              {c.example && <div className="example">{c.example}</div>}
+              {c.example && (
+                <div className="example">
+                  <ClickableText text={c.example} onWord={onWord} />
+                </div>
+              )}
             </div>
             <div className="row-actions">
               <button
@@ -131,6 +141,16 @@ export default function Library() {
           </li>
         ))}
       </ul>
+
+      {lookup && (
+        <WordPanel
+          key={lookup.word}
+          word={lookup.word}
+          context={lookup.context}
+          settings={settings}
+          onClose={() => setLookup(null)}
+        />
+      )}
     </section>
   );
 }

@@ -1,4 +1,7 @@
-export const SCENES = ['日常', '社交', '职场', '学术', '旅行', '餐饮购物', '情绪表达'] as const;
+/** 用户从句子里选出来的生词，作为普通卡片参与复习和同步 */
+export const WORDBOOK = '单词本';
+
+export const SCENES = ['日常', '社交', '职场', '学术', '旅行', '餐饮购物', '情绪表达', WORDBOOK] as const;
 
 export type Rating = 0 | 1 | 2 | 3;
 

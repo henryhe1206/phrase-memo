@@ -82,3 +82,7 @@ code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
 .compare td { padding: 8px; border-bottom: 1px solid var(--border); }
 details.prep { border-bottom: 1px solid var(--border); padding: 8px 0; }
 details.prep summary { cursor: pointer; }
+
+.sheet-foot { padding-top: 12px; }
+.sheet-foot button { width: 100%; padding: 12px; }
+.big-text, .sub-text { white-space: pre-line; }

@@ -1,4 +1,4 @@
-import type { Card, Rating, Settings } from './types';
+import { WORDBOOK, type Card, type Rating, type Settings } from './types';
 
 export function toDateStr(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -86,8 +86,10 @@ export function buildQueue(cards: Card[], settings: Settings, scene?: string): C
 export type StudyMode = 'recall' | 'cloze' | 'listen';
 
 export function modeOf(card: Card): StudyMode {
-  const modes: StudyMode[] = ['recall', 'cloze', 'listen'];
-  return modes[card.reps % 3];
+  // 单个单词没法填空（整个词都会被挖掉），所以单词本不出填空题
+  const modes: StudyMode[] =
+    card.scene === WORDBOOK ? ['recall', 'listen'] : ['recall', 'cloze', 'listen'];
+  return modes[card.reps % modes.length];
 }
 
 /** 填空：挖掉最长的单词 */

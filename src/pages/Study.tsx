@@ -30,7 +30,7 @@ export default function Study({ settings, scene, onExit }: Props) {
   const [queue, setQueue] = useState<Card[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(0);
-  const [word, setWord] = useState<string | null>(null);
+  const [lookup, setLookup] = useState<{ word: string; context: string } | null>(null);
   const busy = useRef(false);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function Study({ settings, scene, onExit }: Props) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (word !== null) return; // 查词面板打开时，不响应翻面和评分快捷键
+      if (lookup) return; // 查词面板打开时，不响应翻面和评分快捷键
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         if (!flipped) flip();
@@ -142,7 +142,7 @@ export default function Study({ settings, scene, onExit }: Props) {
         {flipped && (
           <>
             <div className="big-text">
-              <ClickableText text={card.text} onWord={setWord} />
+              <ClickableText text={card.text} onWord={(word, context) => setLookup({ word, context })} />
               <button className="speaker small" onClick={() => speak(card.text, settings)}>
                 🔊
               </button>
@@ -151,7 +151,7 @@ export default function Study({ settings, scene, onExit }: Props) {
             <div className="sub-text">{card.meaning}</div>
             {card.example && (
               <div className="example">
-                <ClickableText text={card.example} onWord={setWord} />
+                <ClickableText text={card.example} onWord={(word, context) => setLookup({ word, context })} />
               </div>
             )}
             <p className="hint">点击英文单词可查看发音、释义和语法搭配</p>
@@ -176,7 +176,15 @@ export default function Study({ settings, scene, onExit }: Props) {
         </div>
       )}
 
-      {word !== null && <WordPanel key={word} word={word} settings={settings} onClose={() => setWord(null)} />}
+      {lookup && (
+        <WordPanel
+          key={lookup.word}
+          word={lookup.word}
+          context={lookup.context}
+          settings={settings}
+          onClose={() => setLookup(null)}
+        />
+      )}
     </section>
   );
 }
