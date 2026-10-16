@@ -5,10 +5,11 @@ import Home from './pages/Home';
 import Study from './pages/Study';
 import Library from './pages/Library';
 import Grammar from './pages/Grammar';
+import Today from './pages/Today';
 import Stats from './pages/Stats';
 import SettingsPage from './pages/Settings';
 
-type View = 'home' | 'study' | 'library' | 'grammar' | 'stats' | 'settings';
+type View = 'home' | 'study' | 'today' | 'library' | 'grammar' | 'stats' | 'settings';
 
 const SETTINGS_KEY = 'phrase-memo:settings';
 
@@ -79,8 +80,15 @@ export default function App() {
       </header>
       <main>
         {view === 'home' && (
-          <Home settings={settings} scene={scene} onSceneChange={setScene} onStart={() => setView('study')} />
+          <Home
+            settings={settings}
+            scene={scene}
+            onSceneChange={setScene}
+            onStart={() => setView('study')}
+            onOpenToday={() => setView('today')}
+          />
         )}
+        {view === 'today' && <Today settings={settings} onBack={() => setView('home')} />}
         {view === 'library' && <Library settings={settings} />}
         {view === 'grammar' && <Grammar settings={settings} />}
         {view === 'stats' && <Stats />}

@@ -88,3 +88,9 @@ details.prep summary { cursor: pointer; }
 .big-text, .sub-text { white-space: pre-line; }
 
 .banner { background: #fff6e0; border: 1px solid #f3dca3; color: #7a5b00; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 14px; }
+
+.check { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; font-size: 14px; color: var(--muted); }
+.tag.rated.r0 { background: #fde8e8; color: #c53030; }
+.tag.rated.r1 { background: #fff1d6; color: #b7791f; }
+.tag.rated.r2 { background: #e3f6ea; color: #2f855a; }
+.tag.rated.r3 { background: #dff1fb; color: #2b6cb0; }

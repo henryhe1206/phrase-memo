@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { liveCards } from '../db';
+import { db, liveCards } from '../db';
 import { updateBadge } from '../reminder';
 import { buildQueue, today } from '../srs';
 import { SCENES, type Settings } from '../types';
@@ -10,10 +10,15 @@ interface Props {
   scene: string;
   onSceneChange: (scene: string) => void;
   onStart: () => void;
+  onOpenToday: () => void;
 }
 
-export default function Home({ settings, scene, onSceneChange, onStart }: Props) {
+export default function Home({ settings, scene, onSceneChange, onStart, onOpenToday }: Props) {
   const cards = useLiveQuery(liveCards, []);
+  const reviewedToday = useLiveQuery(
+    async () => new Set((await db.logs.where('date').equals(today()).toArray()).map((l) => l.cardUid)).size,
+    [],
+  );
   // 图标角标显示全部场景的待办总数，不受"学习范围"影响
   const totalTodo = cards ? buildQueue(cards, settings).length : null;
 
@@ -65,6 +70,10 @@ export default function Home({ settings, scene, onSceneChange, onStart }: Props)
 
       <button className="primary big" disabled={queue.length === 0} onClick={onStart}>
         {queue.length === 0 ? '今天的任务已完成 🎉' : `开始学习（${queue.length} 张）`}
+      </button>
+
+      <button className="big" disabled={!reviewedToday} onClick={onOpenToday}>
+        📖 查看今天已背的卡片（{reviewedToday ?? 0} 张）
       </button>
 
       <p className="hint">
