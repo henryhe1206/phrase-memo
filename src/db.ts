@@ -44,19 +44,17 @@ export const findInWordbook = (text: string) =>
 export const addToWordbook = (fields: Pick<Card, 'text' | 'meaning' | 'example' | 'note'>) =>
   db.cards.add(newCard({ ...fields, scene: WORDBOOK }));
 
-const SEEDED_KEY ='phrase-memo-sync:seeded';
 
 /**
- * 首次运行时导入内置短语。
+ * 每次启动时补齐缺失的内置短语（首次运行即全部导入，之后新增的内置卡片也会自动补上）。
  * uid 固定、updatedAt 为 0，因此各设备的内置卡片是同一批卡片，
  * 且云端的任何改动（进度、删除）都会覆盖这些未改动的初始版本。
+ * 只补缺失的、不覆盖已有的，所以不会冲掉本地学习进度；删除是软删除，已删除的卡片仍在库里，不会被补回。
  */
-export async function seedIfFirstRun(): Promise<void> {
-  if (localStorage.getItem(SEEDED_KEY)) return;
-  await db.cards.bulkPut(
-    SEED_PHRASES.map(([scene, text, meaning, example], i) =>
-      newCard({ uid: `seed-${i}`, scene, text, meaning, example, createdAt: i, updatedAt: 0, dirty: 0 }),
-    ),
+export async function seedMissingPhrases(): Promise<void> {
+  const seeds = SEED_PHRASES.map(([scene, text, meaning, example], i) =>
+    newCard({ uid: `seed-${i}`, scene, text, meaning, example, createdAt: i, updatedAt: 0, dirty: 0 }),
   );
-  localStorage.setItem(SEEDED_KEY, '1');
+  const existing = new Set(await db.cards.where('uid').anyOf(seeds.map((c) => c.uid)).primaryKeys());
+  await db.cards.bulkAdd(seeds.filter((c) => !existing.has(c.uid)));
 }

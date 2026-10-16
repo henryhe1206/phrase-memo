@@ -1,7 +1,9 @@
+import { MORE_PHRASES } from './phrases-more';
+
 // [场景, 英文, 中文, 例句]
 export type SeedPhrase = [scene: string, text: string, meaning: string, example: string];
 
-export const SEED_PHRASES: SeedPhrase[] = [
+const BASE_PHRASES: SeedPhrase[] = [
   // 日常 (15)
   ['日常', "I'm running late.", '我要迟到了。', "Sorry, I'm running late. I'll be there in ten minutes."],
   ['日常', "I'll be right back.", '我马上回来。', "I'll be right back. I need to grab my charger."],
@@ -116,3 +118,6 @@ export const SEED_PHRASES: SeedPhrase[] = [
   ['情绪表达', "I'm a bit nervous about it.", '我有点紧张。', "I'm a bit nervous about the presentation."],
   ['情绪表达', 'Congratulations! You deserve it.', '恭喜！你值得拥有。', 'Congratulations! You deserve it.'],
 ];
+
+/** 内置卡片的 uid 由下标生成（seed-N）：只能往后追加，不能调整已有顺序 */
+export const SEED_PHRASES: SeedPhrase[] = [...BASE_PHRASES, ...MORE_PHRASES];
