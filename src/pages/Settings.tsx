@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { db, liveCards, newCard } from '../db';
 import { speak } from '../tts';
+import { downloadReminder } from '../reminder';
 import {
   scheduleSync,
   signIn,
@@ -21,6 +22,40 @@ interface Props {
 function clampInt(value: string, min: number, max: number): number {
   const n = Math.round(Number(value));
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : min;
+}
+
+function ReminderSection({ settings, onChange }: Props) {
+  const badgeSupported = 'Notification' in window && 'setAppBadge' in navigator;
+  const [permission, setPermission] = useState(badgeSupported ? Notification.permission : 'denied');
+
+  return (
+    <>
+      <label className="field">
+        每日提醒时间
+        <input
+          type="time"
+          value={settings.reminderTime}
+          onChange={(e) => e.target.value && onChange({ ...settings, reminderTime: e.target.value })}
+        />
+      </label>
+      <button onClick={() => downloadReminder(settings.reminderTime)}>📅 添加到日历（每天重复）</button>
+      <p className="hint">
+        下载后打开 .ics 文件，选择"添加到日历"，每天这个时间系统会准时提醒你。提醒时间改了之后需要重新导入，并删除日历里旧的那条。
+      </p>
+
+      {badgeSupported && permission === 'default' && (
+        <>
+          <button onClick={() => Notification.requestPermission().then(setPermission)}>
+            🔴 允许显示图标角标
+          </button>
+          <p className="hint">
+            iPhone 需要先把应用添加到主屏幕。角标只在你打开应用时更新，显示的是当时的待办数。
+          </p>
+        </>
+      )}
+      {badgeSupported && permission === 'granted' && <p className="hint">图标角标已开启。</p>}
+    </>
+  );
 }
 
 function SyncSection() {
@@ -143,6 +178,9 @@ export default function SettingsPage({ settings, onChange }: Props) {
     <section className="panel">
       <h3>云同步</h3>
       <SyncSection />
+
+      <h3>每日提醒（仅本设备）</h3>
+      <ReminderSection settings={settings} onChange={onChange} />
 
       <h3>学习设置（仅本设备）</h3>
       <label className="field">

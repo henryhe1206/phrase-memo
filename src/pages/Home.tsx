@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { liveCards } from '../db';
+import { updateBadge } from '../reminder';
 import { buildQueue, today } from '../srs';
 import { SCENES, type Settings } from '../types';
 
@@ -12,6 +14,13 @@ interface Props {
 
 export default function Home({ settings, scene, onSceneChange, onStart }: Props) {
   const cards = useLiveQuery(liveCards, []);
+  // 图标角标显示全部场景的待办总数，不受"学习范围"影响
+  const totalTodo = cards ? buildQueue(cards, settings).length : null;
+
+  useEffect(() => {
+    if (totalTodo !== null) updateBadge(totalTodo);
+  }, [totalTodo]);
+
   if (!cards) return null;
 
   const t = today();
@@ -22,6 +31,11 @@ export default function Home({ settings, scene, onSceneChange, onStart }: Props)
 
   return (
     <section className="panel">
+      {queue.length > 0 && (
+        <div className="banner">
+          ⏰ 今天还有 {dueCount} 张卡待复习{newCount > 0 && `，另有 ${newCount} 张新卡可学`}。
+        </div>
+      )}
       <div className="stat-row">
         <div className="stat">
           <b>{dueCount}</b>

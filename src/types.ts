@@ -42,6 +42,8 @@ export interface Settings {
   dailyReview: number;
   accent: 'en-US' | 'en-GB';
   speechRate: number;
+  /** 每日提醒时间，HH:MM */
+  reminderTime: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -49,4 +51,5 @@ export const DEFAULT_SETTINGS: Settings = {
   dailyReview: 100,
   accent: 'en-US',
   speechRate: 0.9,
+  reminderTime: '20:00',
 };
